@@ -327,12 +327,6 @@ int ZENOH::setupSession()
 
 	} while ((ret = z_open(&_s, z_move(config), NULL)) < 0);
 
-	// Start read and lease tasks for zenoh-pico
-	if (zp_start_read_task(z_loan_mut(_s), NULL) < 0 || zp_start_lease_task(z_loan_mut(_s), NULL) < 0) {
-		PX4_ERR("Unable to start read and lease tasks");
-		ret = -EINVAL;
-	}
-
 	return ret;
 }
 
@@ -548,9 +542,6 @@ void ZENOH::cleanupSession()
 	}
 
 	if (z_internal_check(_s)) {
-		zp_stop_read_task(z_session_loan_mut(&_s));
-		zp_stop_lease_task(z_session_loan_mut(&_s));
-
 		z_drop(z_session_move(&_s));
 	}
 

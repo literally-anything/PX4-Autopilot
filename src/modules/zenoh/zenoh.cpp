@@ -37,8 +37,10 @@
 #include <px4_platform_common/log.h>
 #include <px4_platform_common/getopt.h>
 #include <px4_platform_common/cli.h>
+#include <px4_platform_common/posix.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <systemlib/err.h>
 #include <drivers/drv_hrt.h>
 #include <ctype.h>
@@ -300,6 +302,15 @@ int ZENOH::setupSession()
 
 	PX4_INFO("Opening session...");
 
+	// Configure executor thread attributes
+	z_open_options_t open_opts;
+	z_open_options_default(&open_opts);
+
+	pthread_attr_t executor_attr;
+	pthread_attr_init(&executor_attr);
+	pthread_attr_setstacksize(&executor_attr, PX4_STACK_ADJUSTED(2560));
+	open_opts.executor_task_attributes = &executor_attr;
+
 	do {
 		z_config_default(&config);
 		zp_config_insert(z_loan_mut(config), Z_CONFIG_MODE_KEY, mode);
@@ -325,7 +336,9 @@ int ZENOH::setupSession()
 			sleep(5); // Wait 5 seconds when doing a retry
 		}
 
-	} while ((ret = z_open(&_s, z_move(config), NULL)) < 0);
+	} while ((ret = z_open(&_s, z_move(config), &open_opts)) < 0);
+
+	pthread_attr_destroy(&executor_attr);
 
 	return ret;
 }

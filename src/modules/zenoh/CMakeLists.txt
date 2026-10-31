@@ -37,8 +37,10 @@ function(message)
     endif()
 endfunction()
 
-if(NOT APPLE)
-    set(POSIX_COMPATIBLE YES)
+if(APPLE)
+    set(ZP_PLATFORM macos CACHE STRING "" FORCE)
+else()
+    set(ZP_PLATFORM posix_compatible CACHE STRING "" FORCE)
 endif()
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_TESTING OFF)
@@ -67,6 +69,12 @@ set(Z_FEATURE_CONNECTIVITY 0 CACHE STRING "Toggle connectivity status/events API
 set(Z_FEATURE_ADMIN_SPACE 0 CACHE STRING "Toggle admin space support" FORCE)
 set(Z_FEATURE_LOCAL_QUERYABLE 0 CACHE STRING "Toggle local queryables" FORCE)
 
+if(CONFIG_ZENOH_SERIAL)
+    set(Z_FEATURE_LINK_SERIAL 1 CACHE STRING "" FORCE)
+else()
+    set(Z_FEATURE_LINK_SERIAL 0 CACHE STRING "" FORCE)
+endif()
+
 px4_add_git_submodule(TARGET git_zenoh-pico PATH "zenoh-pico")
 add_subdirectory(zenoh-pico)
 unset(MESSAGE_QUIET)
@@ -85,10 +93,6 @@ target_compile_options(zenohpico_static PUBLIC -Wno-cast-align
 target_compile_options(zenohpico_static PRIVATE -Wno-missing-prototypes)
 if(CONFIG_PLATFORM_NUTTX)
     target_compile_options(zenohpico_static PRIVATE -DUNIX_NO_MULTICAST_IF)
-endif()
-
-if(CONFIG_ZENOH_SERIAL)
-    target_compile_options(zenohpico_static PRIVATE -DZ_LINK_SERIAL)
 endif()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/default_topics.c

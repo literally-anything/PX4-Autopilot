@@ -89,6 +89,13 @@ if MODULES_ZENOH
             bool "Custom"
     endchoice
 
+    config ZENOH_SERIAL
+        bool "Zenoh serial link support"
+        default n
+        ---help---
+                Build zenoh-pico with serial link support, for locators such as
+                serial//dev/ttyS3#baudrate=921600. On NuttX the board also needs
+                CONFIG_SERIAL_TERMIOS=y.
 endif
 
 # Kconfig.topics is generated into the build tree (see cmake/kconfig.cmake), not

@@ -46,7 +46,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef __PX4_NUTTX
+#if defined(__PX4_NUTTX) && defined(CONFIG_NET)
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -224,7 +224,7 @@ int ZENOH::generate_rmw_zenoh_topic_liveliness_keyexpr(const z_id_t *id, const c
 
 bool ZENOH::waitForLink(const char *locator)
 {
-#ifdef __PX4_NUTTX
+#if defined(__PX4_NUTTX) && defined(CONFIG_NET)
 
 	// Only IP transports and scouting use the network interface.
 	if (locator[0] != '\0' && strncmp(locator, "tcp/", 4) != 0 && strncmp(locator, "udp/", 4) != 0) {

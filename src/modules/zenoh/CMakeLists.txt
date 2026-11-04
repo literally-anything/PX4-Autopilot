@@ -75,6 +75,15 @@ else()
     set(Z_FEATURE_LINK_SERIAL 0 CACHE STRING "" FORCE)
 endif()
 
+# Disable TCP and UDP links, scouting, and peer mode for builds with no IP stack
+if(CONFIG_PLATFORM_NUTTX AND NOT CONFIG_NET)
+    set(Z_FEATURE_LINK_TCP 0 CACHE STRING "Toggle TCP links" FORCE)
+    set(Z_FEATURE_LINK_UDP_UNICAST 0 CACHE STRING "Toggle UDP unicast links" FORCE)
+    set(Z_FEATURE_LINK_UDP_MULTICAST 0 CACHE STRING "Toggle UDP multicast links" FORCE)
+    set(Z_FEATURE_SCOUTING 0 CACHE STRING "Toggle UDP scouting" FORCE)
+    set(Z_FEATURE_UNICAST_PEER 0 CACHE STRING "Toggle unicast peer mode" FORCE)
+endif()
+
 px4_add_git_submodule(TARGET git_zenoh-pico PATH "zenoh-pico")
 add_subdirectory(zenoh-pico)
 unset(MESSAGE_QUIET)
@@ -90,7 +99,7 @@ target_compile_options(zenohpico_static PUBLIC -Wno-cast-align
 			-Wno-conversion
 			-Wno-float-equal)
 
-target_compile_options(zenohpico_static PRIVATE -Wno-missing-prototypes)
+target_compile_options(zenohpico_static PRIVATE -Wno-missing-prototypes -Wno-unused-but-set-variable)
 if(CONFIG_PLATFORM_NUTTX)
     target_compile_options(zenohpico_static PRIVATE -DUNIX_NO_MULTICAST_IF)
 endif()
